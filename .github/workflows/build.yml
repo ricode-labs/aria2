@@ -73,6 +73,7 @@ jobs:
             --without-libnettle \
             --without-libgmp \
             --without-libxml2 \
+            --without-libssh2 \
             --with-libcares \
             --with-libexpat \
             ARIA2_STATIC=yes \
@@ -152,6 +153,7 @@ jobs:
             --without-libnettle \
             --without-libgmp \
             --without-libxml2 \
+            --without-libssh2 \
             --with-libcares \
             --with-libexpat \
             ARIA2_STATIC=yes \
@@ -199,6 +201,12 @@ jobs:
           export PKG_CONFIG_PATH="$PWD/../_openssl/lib/pkgconfig:$(brew --prefix c-ares)/lib/pkgconfig:$(brew --prefix sqlite)/lib/pkgconfig:$(brew --prefix expat)/lib/pkgconfig"
           export CPPFLAGS="-I$PWD/../_openssl/include -I$(brew --prefix c-ares)/include -I$(brew --prefix sqlite)/include -I$(brew --prefix expat)/include"
           export LDFLAGS="-L$PWD/../_openssl/lib -L$(brew --prefix c-ares)/lib -L$(brew --prefix sqlite)/lib -L$(brew --prefix expat)/lib"
+          export EXPAT_CFLAGS="-I$(brew --prefix expat)/include -DXML_STATIC"
+          export EXPAT_LIBS="$(brew --prefix expat)/lib/libexpat.a"
+          export LIBCARES_CFLAGS="-I$(brew --prefix c-ares)/include -DCARES_STATICLIB"
+          export LIBCARES_LIBS="$(brew --prefix c-ares)/lib/libcares.a -lresolv"
+          export SQLITE3_CFLAGS="-I$(brew --prefix sqlite)/include"
+          export SQLITE3_LIBS="$(brew --prefix sqlite)/lib/libsqlite3.a -lz"
           ./configure \
             --prefix="$PWD/_install" \
             --disable-shared \
@@ -208,6 +216,7 @@ jobs:
             --without-libnettle \
             --without-libgmp \
             --without-libxml2 \
+            --without-libssh2 \
             --with-libcares \
             --with-libexpat \
             ARIA2_STATIC=yes
