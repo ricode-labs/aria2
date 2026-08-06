@@ -85,6 +85,8 @@ jobs:
           mkdir -p ../dist
           cp _install/bin/aria2c ../dist/aria2c-linux-x86_64
           strip ../dist/aria2c-linux-x86_64
+          chmod 755 ../dist/aria2c-linux-x86_64
+          tar -C ../dist -czf ../dist/aria2-${ARIA2_VERSION}-linux-x86_64-static.tar.gz aria2c-linux-x86_64
 
       - name: Test binary
         run: |
@@ -98,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: aria2-${{ env.ARIA2_VERSION }}-linux-x86_64-static
-          path: dist/aria2c-linux-x86_64
+          path: dist/aria2-${{ env.ARIA2_VERSION }}-linux-x86_64-static.tar.gz
           if-no-files-found: error
 
   windows-x86_64:
@@ -119,6 +121,7 @@ jobs:
             perl
             tar
             xz
+            zip
             mingw-w64-ucrt-x86_64-autotools
             mingw-w64-ucrt-x86_64-c-ares
             mingw-w64-ucrt-x86_64-expat
@@ -165,6 +168,7 @@ jobs:
           mkdir -p ../dist
           cp _install/bin/aria2c.exe ../dist/aria2c-windows-x86_64.exe
           strip ../dist/aria2c-windows-x86_64.exe
+          zip -j ../dist/aria2-${ARIA2_VERSION}-windows-x86_64-static.zip ../dist/aria2c-windows-x86_64.exe
 
       - name: Test binary
         run: ./dist/aria2c-windows-x86_64.exe --version
@@ -173,7 +177,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: aria2-${{ env.ARIA2_VERSION }}-windows-x86_64-static
-          path: dist/aria2c-windows-x86_64.exe
+          path: dist/aria2-${{ env.ARIA2_VERSION }}-windows-x86_64-static.zip
           if-no-files-found: error
 
   macos-arm64:
@@ -227,6 +231,8 @@ jobs:
           mkdir -p ../dist
           cp _install/bin/aria2c ../dist/aria2c-macos-arm64
           strip ../dist/aria2c-macos-arm64
+          chmod 755 ../dist/aria2c-macos-arm64
+          tar -C ../dist -czf ../dist/aria2-${ARIA2_VERSION}-macos-arm64-static.tar.gz aria2c-macos-arm64
 
       - name: Test binary
         run: |
@@ -241,7 +247,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: aria2-${{ env.ARIA2_VERSION }}-macos-arm64-static
-          path: dist/aria2c-macos-arm64
+          path: dist/aria2-${{ env.ARIA2_VERSION }}-macos-arm64-static.tar.gz
           if-no-files-found: error
 
   release:
@@ -268,9 +274,12 @@ jobs:
         run: |
           tag="aria2-${ARIA2_VERSION}"
           title="aria2 ${ARIA2_VERSION} static binaries"
-          notes="Static aria2 binaries for linux-x86_64, windows-x86_64, and macos-arm64."
+          notes="Static aria2 binaries for linux-x86_64, windows-x86_64, and macos-arm64. Linux and macOS binaries are packaged as tar.gz archives to preserve executable permissions."
 
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release delete-asset "$tag" aria2c-linux-x86_64 --yes --repo "$GITHUB_REPOSITORY" || true
+            gh release delete-asset "$tag" aria2c-macos-arm64 --yes --repo "$GITHUB_REPOSITORY" || true
+            gh release delete-asset "$tag" aria2c-windows-x86_64.exe --yes --repo "$GITHUB_REPOSITORY" || true
             gh release upload "$tag" release/* --clobber --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$tag" release/* \
