@@ -61,7 +61,7 @@ jobs:
       - name: Build
         working-directory: aria2-${{ env.ARIA2_VERSION }}
         run: |
-          export PKG_CONFIG_PATH="$PWD/../_openssl/lib/pkgconfig"
+          export PKG_CONFIG_PATH="$PWD/../_openssl/lib/pkgconfig:$PWD/../_openssl/lib64/pkgconfig"
           export CPPFLAGS="-I$PWD/../_openssl/include"
           ./configure \
             --prefix="$PWD/_install" \
@@ -76,7 +76,7 @@ jobs:
             --with-libcares \
             --with-libexpat \
             ARIA2_STATIC=yes \
-            LDFLAGS="-static -L$PWD/../_openssl/lib"
+            LDFLAGS="-static -L$PWD/../_openssl/lib -L$PWD/../_openssl/lib64"
           make -j"$(nproc)"
           make install
           mkdir -p ../dist
