@@ -92,7 +92,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: aria2-${{ env.ARIA2_VERSION }}-linux-x86_64-static
           path: dist/aria2c-linux-x86_64
@@ -167,7 +167,7 @@ jobs:
         run: ./dist/aria2c-windows-x86_64.exe --version
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: aria2-${{ env.ARIA2_VERSION }}-windows-x86_64-static
           path: dist/aria2c-windows-x86_64.exe
@@ -235,7 +235,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: aria2-${{ env.ARIA2_VERSION }}-macos-arm64-static-deps
           path: dist/aria2c-macos-arm64
