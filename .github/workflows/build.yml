@@ -270,11 +270,12 @@ jobs:
           title="aria2 ${ARIA2_VERSION} static binaries"
           notes="Static aria2 binaries for linux-x86_64, windows-x86_64, and macos-arm64."
 
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" release/* --clobber
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" release/* --clobber --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$tag" release/* \
               --target "$GITHUB_SHA" \
               --title "$title" \
-              --notes "$notes"
+              --notes "$notes" \
+              --repo "$GITHUB_REPOSITORY"
           fi
