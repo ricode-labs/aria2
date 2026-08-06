@@ -29,7 +29,6 @@ jobs:
             automake \
             build-base \
             c-ares-dev \
-            c-ares-static \
             curl \
             expat-dev \
             expat-static \
