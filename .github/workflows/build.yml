@@ -1,4 +1,4 @@
-name: Build aria2 static binaries
+name: Build aria2 binaries
 
 on:
   workflow_dispatch:
@@ -24,22 +24,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
-            autoconf \
-            automake \
             build-essential \
             ca-certificates \
             curl \
-            dpkg-dev \
-            file \
             gettext \
             libc-ares-dev \
             libcppunit-dev \
             libexpat1-dev \
-            libtool \
             libsqlite3-dev \
             libssl-dev \
             pkg-config \
-            tar \
             xz-utils \
             zlib1g-dev
 
@@ -51,15 +45,13 @@ jobs:
       - name: Build
         working-directory: aria2-${{ env.ARIA2_VERSION }}
         run: |
-          multiarch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+          multiarch="$(gcc -print-multiarch)"
           export LIBCARES_LIBS="/usr/lib/$multiarch/libcares_static.a -lresolv -lpthread"
           export EXPAT_LIBS="/usr/lib/$multiarch/libexpat.a"
           export SQLITE3_LIBS="/usr/lib/$multiarch/libsqlite3.a -ldl -lm -lpthread /usr/lib/$multiarch/libz.a"
           export ZLIB_LIBS="/usr/lib/$multiarch/libz.a"
           ./configure \
             --prefix="$PWD/_install" \
-            --disable-shared \
-            --enable-static \
             --with-openssl \
             --without-gnutls \
             --without-libnettle \
@@ -83,19 +75,19 @@ jobs:
       - name: Test binary
         run: |
           ./dist/aria2c-linux-x86_64 --version
-          ldd ./dist/aria2c-linux-x86_64
+          ldd_output="$(ldd ./dist/aria2c-linux-x86_64)"
+          printf '%s\n' "$ldd_output"
           for library in libssl.so.3 libcrypto.so.3; do
-            if ! ldd ./dist/aria2c-linux-x86_64 | grep -Fq "$library"; then
+            if ! printf '%s\n' "$ldd_output" | grep -Fq "$library"; then
               echo "Missing required dynamic dependency: $library"
               exit 1
             fi
           done
-          if ldd ./dist/aria2c-linux-x86_64 | grep -Eq 'libcares|libexpat|libsqlite3|libz\.so'; then
-            ldd ./dist/aria2c-linux-x86_64
+          if printf '%s\n' "$ldd_output" | grep -Eq 'libcares|libexpat|libsqlite3|libz\.so'; then
             exit 1
           fi
           ./dist/aria2c-linux-x86_64 --dry-run --max-tries=1 --timeout=30 \
-            "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/x86_64/iso/Fedora-Workstation-Live-44-1.7.x86_64.iso"
+            "https://github.com/aria2/aria2/releases/download/release-${ARIA2_VERSION}/aria2-${ARIA2_VERSION}.tar.xz"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
