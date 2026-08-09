@@ -183,7 +183,9 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Install dependencies
-        run: brew install autoconf automake cppunit libtool pkg-config c-ares sqlite expat
+        run: |
+          brew untap aws/tap || true
+          brew install autoconf automake cppunit libtool pkg-config c-ares sqlite expat
 
       - name: Download aria2
         run: |
@@ -219,6 +221,7 @@ jobs:
             --with-libz \
             ARIA2_STATIC=yes
           make -j"$(sysctl -n hw.ncpu)"
+          sudo route -nv add -net 224.0.0.0/4 -interface lo0 || true
           make check || { cat test/test-suite.log; exit 1; }
           make install
           mkdir -p ../dist
