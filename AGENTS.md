@@ -15,6 +15,7 @@ There is no local application source, package manifest, or test suite in this re
 The workflow builds `aria2c` binaries for these targets:
 
 - `linux-x86_64`, with static application dependencies and dynamic system OpenSSL 3
+- `linux-arm64`, with static application dependencies and dynamic system OpenSSL 3
 - `windows-x86_64` using MSYS2 UCRT64
 - `macos-arm64`
 
@@ -28,7 +29,7 @@ Keep each platform's dependency paths, compiler flags, link settings, and verifi
 
 Pull requests build and test the binaries, but do not publish releases. Pushes do not trigger the workflow.
 
-Manual workflow dispatch builds all three platform targets and then runs the `release` job after they succeed.
+Manual workflow dispatch builds all platform targets and then runs the `release` job after they succeed.
 
 Platform verification includes `make check` and `aria2c --version`. Linux verifies dynamic system OpenSSL 3, rejects dynamic application dependencies, and performs an HTTPS request without `--ca-certificate`; macOS checks the `arm64` architecture and Homebrew library paths with `otool`.
 
@@ -39,6 +40,7 @@ Manual dispatch publishes tag `aria2-${ARIA2_VERSION}` and marks that release as
 Release asset names are fixed and do not include the aria2 version or `static`:
 
 - `aria2-linux-x86_64.tar.gz`
+- `aria2-linux-arm64.tar.gz`
 - `aria2-macos-arm64.tar.gz`
 - `aria2-windows-x86_64.zip`
 

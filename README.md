@@ -11,6 +11,7 @@ This repository is a release builder. The upstream aria2 source archive is downl
 These links always resolve to the latest published release:
 
 - Linux x86_64: https://github.com/ricode-labs/aria2/releases/latest/download/aria2-linux-x86_64.tar.gz
+- Linux arm64: https://github.com/ricode-labs/aria2/releases/latest/download/aria2-linux-arm64.tar.gz
 - macOS arm64: https://github.com/ricode-labs/aria2/releases/latest/download/aria2-macos-arm64.tar.gz
 - Windows x86_64: https://github.com/ricode-labs/aria2/releases/latest/download/aria2-windows-x86_64.zip
 
@@ -19,5 +20,6 @@ The release tag contains the aria2 version, for example `aria2-1.37.0`.
 ## Release Assets
 
 - `aria2-linux-x86_64.tar.gz`
+- `aria2-linux-arm64.tar.gz`
 - `aria2-macos-arm64.tar.gz`
 - `aria2-windows-x86_64.zip`
