@@ -34,7 +34,7 @@ Platform verification includes `make check` and `aria2c --version`. Linux additi
 
 ## Release Behavior
 
-Manual dispatch publishes tag `aria2-${ARIA2_VERSION}` and marks that release as Latest.
+Manual dispatch publishes tag `aria2-${ARIA2_VERSION}` and marks that release as Latest. If a release for the same tag already exists, the workflow deletes the existing release before creating it again.
 
 Release asset names are fixed and do not include the aria2 version or `static`:
 

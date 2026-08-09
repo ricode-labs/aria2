@@ -263,26 +263,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="aria2-${ARIA2_VERSION}"
-          title="aria2 ${ARIA2_VERSION} binaries"
-          notes="aria2 binaries for linux-x86_64, windows-x86_64, and macos-arm64. Linux and macOS binaries are packaged as tar.gz archives to preserve executable permissions."
 
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release delete-asset "$tag" aria2c-linux-x86_64 --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" aria2c-macos-arm64 --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" aria2c-windows-x86_64.exe --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" "aria2-${ARIA2_VERSION}-linux-x86_64-static.tar.gz" --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" "aria2-${ARIA2_VERSION}-macos-arm64-static.tar.gz" --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" "aria2-${ARIA2_VERSION}-windows-x86_64-static.zip" --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" aria2-linux-x86_64-static.tar.gz --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" aria2-macos-arm64-static.tar.gz --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release delete-asset "$tag" aria2-windows-x86_64-static.zip --yes --repo "$GITHUB_REPOSITORY" || true
-            gh release edit "$tag" --title "$title" --notes "$notes" --latest --repo "$GITHUB_REPOSITORY"
-            gh release upload "$tag" release/* --clobber --repo "$GITHUB_REPOSITORY"
-          else
-            gh release create "$tag" release/* \
-              --target "$GITHUB_SHA" \
-              --title "$title" \
-              --notes "$notes" \
-              --latest \
-              --repo "$GITHUB_REPOSITORY"
+            gh release delete "$tag" --yes --repo "$GITHUB_REPOSITORY"
           fi
+
+          gh release create "$tag" release/* \
+            --target "$GITHUB_SHA" \
+            --title "aria2 ${ARIA2_VERSION} binaries" \
+            --notes "aria2 binaries for linux-x86_64, windows-x86_64, and macos-arm64. Linux and macOS binaries are packaged as tar.gz archives to preserve executable permissions." \
+            --latest \
+            --repo "$GITHUB_REPOSITORY"
