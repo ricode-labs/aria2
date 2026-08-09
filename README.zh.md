@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文** | [日本語](README.ja.md)
 
-使用 GitHub Actions 为 Linux、Windows 和 macOS 构建的静态 `aria2c` 二进制文件。
+使用 GitHub Actions 为 Linux、Windows 和 macOS 构建的 `aria2c` 二进制文件。Linux 二进制静态链接应用依赖，动态链接系统 OpenSSL 3，并使用操作系统的 CA 证书库。
 
 本仓库是一个发布构建器。CI 会下载上游 aria2 源码包，完成构建，使用 `make check` 和 `aria2c --version` 进行测试，然后发布到 GitHub Releases。
 

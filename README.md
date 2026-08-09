@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh.md) | [日本語](README.ja.md)
 
-Static `aria2c` binaries built with GitHub Actions for Linux, Windows, and macOS.
+`aria2c` binaries built with GitHub Actions for Linux, Windows, and macOS. The Linux binary statically links application dependencies and dynamically links system OpenSSL 3, using the operating system's CA certificate store.
 
 This repository is a release builder. The upstream aria2 source archive is downloaded during CI, built, tested with `make check` and `aria2c --version`, and published to GitHub Releases.
 

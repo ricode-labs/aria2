@@ -11,7 +11,6 @@ on:
 
 env:
   ARIA2_VERSION: ${{ inputs.aria2_version || '1.37.0' }}
-  OPENSSL_VERSION: 3.6.3
 
 permissions:
   contents: read
@@ -20,40 +19,29 @@ jobs:
   linux-x86_64:
     name: linux-x86_64
     runs-on: ubuntu-latest
-    container: alpine:3.24
     steps:
       - name: Install dependencies
         run: |
-          apk add --no-cache \
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
             autoconf \
             automake \
-            build-base \
-            c-ares-dev \
-            cppunit-dev \
+            build-essential \
+            ca-certificates \
             curl \
-            expat-dev \
-            expat-static \
+            dpkg-dev \
             file \
-            gettext-dev \
+            gettext \
+            libc-ares-dev \
+            libcppunit-dev \
+            libexpat1-dev \
             libtool \
-            linux-headers \
-            perl \
-            pkgconf \
-            sqlite-dev \
-            sqlite-static \
+            libsqlite3-dev \
+            libssl-dev \
+            pkg-config \
             tar \
-            xz \
-            zlib-dev \
-            zlib-static
-
-      - name: Build OpenSSL
-        run: |
-          curl -fsSL "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz" -o openssl.tar.gz
-          tar -xf openssl.tar.gz
-          cd "openssl-${OPENSSL_VERSION}"
-          ./Configure linux-x86_64 no-shared no-module no-dso no-tests no-zlib --prefix="$PWD/../_openssl"
-          make -j"$(nproc)"
-          make install_sw
+            xz-utils \
+            zlib1g-dev
 
       - name: Download aria2
         run: |
@@ -63,8 +51,11 @@ jobs:
       - name: Build
         working-directory: aria2-${{ env.ARIA2_VERSION }}
         run: |
-          export PKG_CONFIG_PATH="$PWD/../_openssl/lib/pkgconfig:$PWD/../_openssl/lib64/pkgconfig"
-          export CPPFLAGS="-I$PWD/../_openssl/include"
+          multiarch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+          export LIBCARES_LIBS="/usr/lib/$multiarch/libcares_static.a -lresolv -lpthread"
+          export EXPAT_LIBS="/usr/lib/$multiarch/libexpat.a"
+          export SQLITE3_LIBS="/usr/lib/$multiarch/libsqlite3.a -ldl -lm -lpthread /usr/lib/$multiarch/libz.a"
+          export ZLIB_LIBS="/usr/lib/$multiarch/libz.a"
           ./configure \
             --prefix="$PWD/_install" \
             --disable-shared \
@@ -79,8 +70,7 @@ jobs:
             --with-libexpat \
             --with-sqlite3 \
             --with-libz \
-            ARIA2_STATIC=yes \
-            LDFLAGS="-static -L$PWD/../_openssl/lib -L$PWD/../_openssl/lib64"
+            ARIA2_STATIC=no
           make -j"$(nproc)"
           make check || { cat test/test-suite.log; exit 1; }
           make install
@@ -93,10 +83,19 @@ jobs:
       - name: Test binary
         run: |
           ./dist/aria2c-linux-x86_64 --version
-          if ldd ./dist/aria2c-linux-x86_64 2>&1 | grep -q "=>"; then
+          ldd ./dist/aria2c-linux-x86_64
+          for library in libssl.so.3 libcrypto.so.3; do
+            if ! ldd ./dist/aria2c-linux-x86_64 | grep -Fq "$library"; then
+              echo "Missing required dynamic dependency: $library"
+              exit 1
+            fi
+          done
+          if ldd ./dist/aria2c-linux-x86_64 | grep -Eq 'libcares|libexpat|libsqlite3|libz\.so'; then
             ldd ./dist/aria2c-linux-x86_64
             exit 1
           fi
+          ./dist/aria2c-linux-x86_64 --dry-run --max-tries=1 --timeout=30 \
+            "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/x86_64/iso/Fedora-Workstation-Live-44-1.7.x86_64.iso"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
