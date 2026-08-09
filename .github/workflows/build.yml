@@ -267,16 +267,7 @@ jobs:
         run: |
           tag="aria2-${ARIA2_VERSION}"
           title="aria2 ${ARIA2_VERSION} binaries"
-          latest_url="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download"
-          notes=$(cat <<EOF
-          aria2 binaries for linux-x86_64, windows-x86_64, and macos-arm64. Linux and macOS binaries are packaged as tar.gz archives to preserve executable permissions.
-
-          Latest download links:
-          - Linux x86_64: ${latest_url}/aria2-linux-x86_64.tar.gz
-          - macOS arm64: ${latest_url}/aria2-macos-arm64.tar.gz
-          - Windows x86_64: ${latest_url}/aria2-windows-x86_64.zip
-          EOF
-          )
+          notes="aria2 binaries for linux-x86_64, windows-x86_64, and macos-arm64. Linux and macOS binaries are packaged as tar.gz archives to preserve executable permissions."
 
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release delete-asset "$tag" aria2c-linux-x86_64 --yes --repo "$GITHUB_REPOSITORY" || true
