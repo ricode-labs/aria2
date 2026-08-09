@@ -16,9 +16,17 @@ permissions:
   contents: read
 
 jobs:
-  linux-x86_64:
-    name: linux-x86_64
-    runs-on: ubuntu-latest
+  linux:
+    name: linux-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
       - name: Install dependencies
         run: |
@@ -67,15 +75,15 @@ jobs:
           make check || { cat test/test-suite.log; exit 1; }
           make install
           mkdir -p ../dist
-          cp _install/bin/aria2c ../dist/aria2c-linux-x86_64
-          strip ../dist/aria2c-linux-x86_64
-          chmod 755 ../dist/aria2c-linux-x86_64
-          tar -C ../dist -czf ../dist/aria2-linux-x86_64.tar.gz aria2c-linux-x86_64
+          cp _install/bin/aria2c ../dist/aria2c-linux-${{ matrix.arch }}
+          strip ../dist/aria2c-linux-${{ matrix.arch }}
+          chmod 755 ../dist/aria2c-linux-${{ matrix.arch }}
+          tar -C ../dist -czf ../dist/aria2-linux-${{ matrix.arch }}.tar.gz aria2c-linux-${{ matrix.arch }}
 
       - name: Test binary
         run: |
-          ./dist/aria2c-linux-x86_64 --version
-          ldd_output="$(ldd ./dist/aria2c-linux-x86_64)"
+          ./dist/aria2c-linux-${{ matrix.arch }} --version
+          ldd_output="$(ldd ./dist/aria2c-linux-${{ matrix.arch }})"
           printf '%s\n' "$ldd_output"
           for library in libssl.so.3 libcrypto.so.3; do
             if ! printf '%s\n' "$ldd_output" | grep -Fq "$library"; then
@@ -86,99 +94,19 @@ jobs:
           if printf '%s\n' "$ldd_output" | grep -Eq 'libcares|libexpat|libsqlite3|libz\.so'; then
             exit 1
           fi
-          ./dist/aria2c-linux-x86_64 --dry-run --max-tries=1 --timeout=30 \
+          ./dist/aria2c-linux-${{ matrix.arch }} --dry-run --max-tries=1 --timeout=30 \
             "https://github.com/aria2/aria2/releases/download/release-${ARIA2_VERSION}/aria2-${ARIA2_VERSION}.tar.xz"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: aria2-linux-x86_64
-          path: dist/aria2-linux-x86_64.tar.gz
-          if-no-files-found: error
-
-  linux-arm64:
-    name: linux-arm64
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends \
-            build-essential \
-            ca-certificates \
-            curl \
-            gettext \
-            libc-ares-dev \
-            libcppunit-dev \
-            libexpat1-dev \
-            libsqlite3-dev \
-            libssl-dev \
-            pkg-config \
-            xz-utils \
-            zlib1g-dev
-
-      - name: Download aria2
-        run: |
-          curl -fsSL "https://github.com/aria2/aria2/releases/download/release-${ARIA2_VERSION}/aria2-${ARIA2_VERSION}.tar.xz" -o aria2.tar.xz
-          tar -xf aria2.tar.xz
-
-      - name: Build
-        working-directory: aria2-${{ env.ARIA2_VERSION }}
-        run: |
-          multiarch="$(gcc -print-multiarch)"
-          export LIBCARES_LIBS="/usr/lib/$multiarch/libcares_static.a -lresolv -lpthread"
-          export EXPAT_LIBS="/usr/lib/$multiarch/libexpat.a"
-          export SQLITE3_LIBS="/usr/lib/$multiarch/libsqlite3.a -ldl -lm -lpthread /usr/lib/$multiarch/libz.a"
-          export ZLIB_LIBS="/usr/lib/$multiarch/libz.a"
-          ./configure \
-            --prefix="$PWD/_install" \
-            --with-openssl \
-            --without-gnutls \
-            --without-libnettle \
-            --without-libgmp \
-            --without-libxml2 \
-            --without-libssh2 \
-            --with-libcares \
-            --with-libexpat \
-            --with-sqlite3 \
-            --with-libz \
-            ARIA2_STATIC=no
-          make -j"$(nproc)"
-          make check || { cat test/test-suite.log; exit 1; }
-          make install
-          mkdir -p ../dist
-          cp _install/bin/aria2c ../dist/aria2c-linux-arm64
-          strip ../dist/aria2c-linux-arm64
-          chmod 755 ../dist/aria2c-linux-arm64
-          tar -C ../dist -czf ../dist/aria2-linux-arm64.tar.gz aria2c-linux-arm64
-
-      - name: Test binary
-        run: |
-          ./dist/aria2c-linux-arm64 --version
-          ldd_output="$(ldd ./dist/aria2c-linux-arm64)"
-          printf '%s\n' "$ldd_output"
-          for library in libssl.so.3 libcrypto.so.3; do
-            if ! printf '%s\n' "$ldd_output" | grep -Fq "$library"; then
-              echo "Missing required dynamic dependency: $library"
-              exit 1
-            fi
-          done
-          if printf '%s\n' "$ldd_output" | grep -Eq 'libcares|libexpat|libsqlite3|libz\.so'; then
-            exit 1
-          fi
-          ./dist/aria2c-linux-arm64 --dry-run --max-tries=1 --timeout=30 \
-            "https://github.com/aria2/aria2/releases/download/release-${ARIA2_VERSION}/aria2-${ARIA2_VERSION}.tar.xz"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: aria2-linux-arm64
-          path: dist/aria2-linux-arm64.tar.gz
+          name: aria2-linux-${{ matrix.arch }}
+          path: dist/aria2-linux-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
 
   windows-x86_64:
     name: windows-x86_64
-    runs-on: windows-latest
+    runs-on: windows-2025
     defaults:
       run:
         shell: msys2 {0}
@@ -313,10 +241,9 @@ jobs:
 
   release:
     name: release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
-      - linux-x86_64
-      - linux-arm64
+      - linux
       - windows-x86_64
       - macos-arm64
     if: github.event_name == 'workflow_dispatch'
