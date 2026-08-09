@@ -179,7 +179,19 @@ jobs:
     runs-on: macos-14
     steps:
       - name: Install dependencies
-        run: brew install autoconf automake cppunit libtool pkg-config c-ares sqlite expat
+        run: |
+          brew untap aws/tap || true
+
+          missing=()
+          for package in autoconf automake cppunit libtool pkgconf c-ares sqlite expat; do
+            if ! brew list --formula "$package" >/dev/null 2>&1; then
+              missing+=("$package")
+            fi
+          done
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            brew install "${missing[@]}"
+          fi
 
       - name: Download aria2
         run: |
@@ -251,11 +263,20 @@ jobs:
       contents: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v8
-        with:
-          pattern: aria2-*
-          path: release
-          merge-multiple: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          for artifact in \
+            aria2-linux-x86_64 \
+            aria2-linux-arm64 \
+            aria2-windows-x86_64 \
+            aria2-macos-arm64; do
+            gh run download "$GITHUB_RUN_ID" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name "$artifact" \
+              --dir release
+          done
 
       - name: Publish release
         env:
