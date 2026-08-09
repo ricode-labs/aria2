@@ -7,9 +7,6 @@ on:
         description: aria2 release version to build
         required: true
         default: 1.37.0
-  push:
-    branches:
-      - main
   pull_request:
 
 env:

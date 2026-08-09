@@ -26,7 +26,7 @@ Keep each platform's dependency paths, compiler flags, static-link settings, and
 
 ## CI Behavior
 
-Pushes and pull requests build and test the binaries, but do not publish releases.
+Pull requests build and test the binaries, but do not publish releases. Pushes do not trigger the workflow.
 
 Manual workflow dispatch builds all three platform targets and then runs the `release` job after they succeed.
 
