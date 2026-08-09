@@ -85,7 +85,7 @@ jobs:
             ARIA2_STATIC=yes \
             LDFLAGS="-static -L$PWD/../_openssl/lib -L$PWD/../_openssl/lib64"
           make -j"$(nproc)"
-          make check
+          make check || { cat test/test-suite.log; exit 1; }
           make install
           mkdir -p ../dist
           cp _install/bin/aria2c ../dist/aria2c-linux-x86_64
@@ -161,7 +161,7 @@ jobs:
             ARIA2_STATIC=yes \
             LDFLAGS="-static -static-libgcc -static-libstdc++"
           make -j"$(nproc)"
-          make check
+          make check || { cat test/test-suite.log; exit 1; }
           make install
           mkdir -p ../dist
           cp _install/bin/aria2c.exe ../dist/aria2c-windows-x86_64.exe
@@ -219,7 +219,7 @@ jobs:
             --with-libz \
             ARIA2_STATIC=yes
           make -j"$(sysctl -n hw.ncpu)"
-          make check
+          make check || { cat test/test-suite.log; exit 1; }
           make install
           mkdir -p ../dist
           cp _install/bin/aria2c ../dist/aria2c-macos-arm64
