@@ -1,5 +1,7 @@
 # aria2 静态二进制文件
 
+[English](README.md) | **简体中文** | [日本語](README.ja.md)
+
 使用 GitHub Actions 为 Linux、Windows 和 macOS 构建的静态 `aria2c` 二进制文件。
 
 本仓库是一个发布构建器。CI 会下载上游 aria2 源码包，完成构建，使用 `make check` 和 `aria2c --version` 进行测试，然后发布到 GitHub Releases。

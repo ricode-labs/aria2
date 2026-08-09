@@ -1,5 +1,7 @@
 # aria2 static binaries
 
+**English** | [简体中文](README.zh.md) | [日本語](README.ja.md)
+
 Static `aria2c` binaries built with GitHub Actions for Linux, Windows, and macOS.
 
 This repository is a release builder. The upstream aria2 source archive is downloaded during CI, built, tested with `make check` and `aria2c --version`, and published to GitHub Releases.

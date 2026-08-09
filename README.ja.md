@@ -1,5 +1,7 @@
 # aria2 静的バイナリ
 
+[English](README.md) | [简体中文](README.zh.md) | **日本語**
+
 GitHub Actions で Linux、Windows、macOS 向けにビルドした静的 `aria2c` バイナリです。
 
 このリポジトリはリリースビルダーです。CI で upstream の aria2 ソースアーカイブをダウンロードし、ビルドしたうえで `make check` と `aria2c --version` によりテストし、GitHub Releases に公開します。
