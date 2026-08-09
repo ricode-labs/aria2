@@ -4,6 +4,8 @@
 
 This repository is a GitHub Actions release builder for aria2 static binaries. It is not the upstream aria2 source tree.
 
+Before making assumptions about aria2 configuration, TLS behavior, or build options, consult the official aria2 manual: https://aria2.github.io/manual/en/html/README.html
+
 The workflow at `.github/workflows/build.yml` is the executable source of truth. Upstream aria2 source archives and OpenSSL source archives are downloaded during CI.
 
 There is no local application source, package manifest, or test suite in this repository. Do not add generated binaries, downloaded source trees, or `dist/` output to the repository.
